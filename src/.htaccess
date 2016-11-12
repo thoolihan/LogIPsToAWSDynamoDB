@@ -1,0 +1,5 @@
+Options +ExecCGI
+AddHandler fcgid-script .fcgi
+RewriteEngine On
+RewriteCond %{REQUEST_FILENAME} !=/home3/unmoldab/public_html/ip/ip.fcgi
+RewriteRule ^(.*)$ ip.fcgi/$1 [QSA,L]
