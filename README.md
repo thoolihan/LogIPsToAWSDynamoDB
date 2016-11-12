@@ -11,6 +11,7 @@ cp credentials.json.sample credentials.json
 - create dynamodb table ip_log (hash key: location sort key: date)
 
 ```
+cd src/
 python ip.py
 ```
 - browse to localhost:5000
