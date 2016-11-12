@@ -1,0 +1,35 @@
+<html>
+  <head>
+    <title>Log IP</title>
+  </head>
+  <body>
+    <form id="logForm" action='log_ip'>
+      <fieldset>
+        <legend>Log Current IP</legend>
+        <label for="location">Location Name</label>
+        <input type="text" name="location" value="home"><br>
+        <input type="submit" value="Save">
+      </fieldset>
+    </form>
+    <div id="result"></div>
+  </body>
+  <script
+    src="https://code.jquery.com/jquery-3.1.1.min.js"
+    integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
+    crossorigin="anonymous"></script>
+  <script type="text/javascript">
+    $(document).ready(function(){
+      $('#logForm').submit(function(e){
+        $.ajax({type: "POST",
+                url: 'log_ip',
+                data: $('#logForm').serialize(),
+                success: function(data){
+                  var txt = 'status: ' + data['result'] + ' ip: ' + data['ip'] + ' location: ' + data['location'];
+                  $('#result').text(txt);
+                }
+        });
+        e.preventDefault();
+      });
+    });
+  </script>
+</html>

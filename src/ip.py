@@ -3,13 +3,29 @@ from flask import jsonify
 from flask import request, Response
 from functools import wraps
 from datetime import datetime
+import os
 import boto3
 import json
+import argparse
 from boto3.dynamodb.conditions import Key, Attr
 app = Flask(__name__)
 
 cred_file = open('credentials.json').read()
 creds = json.loads(cred_file)
+parser = argparse.ArgumentParser()
+parser.add_argument('-l', '--local', help="set to anything to use local dynamodb")
+args = parser.parse_args()
+tbl_name="ip_log"
+
+def root_dir():  # pragma: no cover
+    return os.path.abspath(os.path.dirname(__file__))
+
+def get_file(filename):  # pragma: no cover
+    try:
+        src = os.path.join(root_dir(), 'templates', filename)
+        return open(src).read()
+    except IOError as exc:
+        return str(exc)
 
 def check_auth(user, password):
     return user==creds['user'] and password==creds['password']
@@ -31,7 +47,12 @@ def requires_auth(f):
     return decorated
 
 def get_ip_log():
-    return boto3.resource('dynamodb').Table('ip_log')
+    if args.local:
+        dyn = boto3.resource('dynamodb',
+                             endpoint_url='http://localhost:8000')
+    else:
+        dyn = boto3.resource('dynamodb')
+    return dyn.Table(tbl_name)
 
 def log_to_aws(ip, location):
     dt = datetime.now()
@@ -40,6 +61,11 @@ def log_to_aws(ip, location):
             "location": location,
             "date": str(dt)}
     ip_log_table.put_item(Item = data)
+
+@app.route('/log', methods=['GET'])
+def metrics():  # pragma: no cover
+    content = get_file('log.html')
+    return Response(content, mimetype="text/html")
 
 @app.route("/", methods=['GET'])
 @requires_auth
